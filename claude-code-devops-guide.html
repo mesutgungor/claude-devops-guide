@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — Full DevOps Ownership Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f6f7f9; --bg3: #eef0f4;
+    --text: #1a1a1a; --text2: #555; --text3: #888;
+    --border: #e2e4e9; --accent: #5B4FCF;
+    --teal: #0F6E56; --teal-bg: #E1F5EE;
+    --amber: #854F0B; --amber-bg: #FAEEDA;
+    --coral: #993C1D; --coral-bg: #FAECE7;
+    --blue: #185FA5; --blue-bg: #E6F1FB;
+    --green: #3B6D11; --green-bg: #EAF3DE;
+    --purple: #534AB7; --purple-bg: #EEEDFE;
+    --pink: #993556; --pink-bg: #FBEAF0;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .hero { background: linear-gradient(135deg, #1a1040 0%, #2d1a6e 50%, #1a3060 100%); color: #fff; padding: 3rem 2rem 2.5rem; text-align: center; }
+  .hero h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+  .hero p { font-size: 1.05rem; opacity: 0.8; max-width: 640px; margin: 0.5rem auto 0; }
+  .hero .badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; margin-bottom: 1rem; letter-spacing: 0.5px; }
+  nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 1.2rem 2rem; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  nav a { font-size: 0.8rem; padding: 5px 13px; border-radius: 20px; text-decoration: none; color: var(--text2); border: 1px solid var(--border); background: var(--bg); transition: all 0.15s; }
+  nav a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .intro-box { background: var(--purple-bg); border: 1px solid #cbc8f0; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; }
+  .intro-box h2 { font-size: 1rem; color: var(--purple); font-weight: 600; margin-bottom: 0.5rem; }
+  .intro-box p { font-size: 0.9rem; color: #4a3f9e; line-height: 1.7; }
+  section { margin-bottom: 3rem; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+  .section-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .section-header h2 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+  .section-header .tag { font-size: 0.72rem; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; }
+  .card-title { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px; }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .card p { font-size: 0.82rem; color: var(--text2); margin-bottom: 0.75rem; line-height: 1.6; }
+  .cmd-block { background: #0d1117; border-radius: 8px; padding: 0.75rem 1rem; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 0.75rem; line-height: 1.7; overflow-x: auto; }
+  .cmd-block .comment { color: #6e7681; }
+  .cmd-block .cmd { color: #e6edf3; }
+  .cmd-block .prompt { color: #79c0ff; }
+  .cmd-block .output { color: #a5d6ff; }
+  .cmd-block .highlight { color: #ffa657; }
+  .step-list { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+  .step-list li { counter-increment: steps; display: flex; gap: 12px; align-items: flex-start; font-size: 0.85rem; }
+  .step-list li::before { content: counter(steps); min-width: 24px; height: 24px; background: var(--accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-list li span { color: var(--text2); line-height: 1.6; }
+  .step-list li strong { color: var(--text); }
+  .mcp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .mcp-badge { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 1rem; display: flex; align-items: center; gap: 8px; }
+  .mcp-badge .icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+  .mcp-badge .info { flex: 1; }
+  .mcp-badge .name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+  .mcp-badge .desc { font-size: 0.72rem; color: var(--text3); }
+  .prompt-example { background: var(--bg2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 0.75rem 1rem; margin: 8px 0; font-size: 0.82rem; color: var(--text); font-style: italic; }
+  .prompt-example::before { content: '→ '; color: var(--accent); font-style: normal; font-weight: 600; }
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { background: var(--bg2); padding: 0.65rem 1rem; text-align: left; font-weight: 600; color: var(--text2); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
+  td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--bg2); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; }
+  .pill-teal { background: var(--teal-bg); color: var(--teal); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .pill-coral { background: var(--coral-bg); color: var(--coral); }
+  .pill-blue { background: var(--blue-bg); color: var(--blue); }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-purple { background: var(--purple-bg); color: var(--purple); }
+  .warning-box { background: var(--amber-bg); border: 1px solid #f0c06a; border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.83rem; color: var(--amber); }
+  .warning-box strong { display: block; margin-bottom: 4px; font-size: 0.85rem; }
+  .info-box { background: var(--blue-bg); border: 1px solid #9dc5f0; border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.83rem; color: var(--blue); }
+  .info-box strong { display: block; margin-bottom: 4px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } .hero h1 { font-size: 1.6rem; } }
+  h3.sub { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 1.25rem 0 0.75rem; }
+  .toc { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { font-size: 0.85rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+  .toc-item { font-size: 0.82rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; color: var(--blue); display: flex; align-items: center; gap: 6px; }
+  .toc-item:hover { background: var(--border); }
+  .toc-num { font-weight: 700; color: var(--text3); font-size: 0.75rem; min-width: 18px; }
+  footer { text-align: center; padding: 2rem; font-size: 0.78rem; color: var(--text3); border-top: 1px solid var(--border); margin-top: 2rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">CLAUDE CODE · COMPLETE DEVOPS GUIDE</div>
+  <h1>From Code to Production — All in Claude Code</h1>
+  <p>How Claude Code handles Deployment, Cloud Operations, CI/CD, Security, Monitoring, and everything beyond writing app code.</p>
+</div>
+
+<nav>
+  <a href="#foundation">Foundation</a>
+  <a href="#cicd">CI/CD</a>
+  <a href="#cloud">Cloud Ops</a>
+  <a href="#iac">IaC</a>
+  <a href="#secops">SecOps</a>
+  <a href="#monitoring">Monitoring</a>
+  <a href="#containers">Containers</a>
+  <a href="#database">Database</a>
+  <a href="#mcp">MCP Servers</a>
+  <a href="#automation">Automation</a>
+  <a href="#claudemd">CLAUDE.md</a>
+  <a href="#enterprise">Enterprise</a>
+  <a href="#scalability">Scalability</a>
+  <a href="#hardened">Hardened Images</a>
+  <a href="#observability">Observability</a>
+  <a href="#compliance">Compliance</a>
+  <a href="#multicloud">Multi-Cloud</a>
+  <a href="#wellarch">Well-Architected</a>
+</nav>
+
+<div class="container">
+
+  <div class="intro-box">
+    <h2>How this works</h2>
+    <p>Claude Code is a terminal-native AI agent with a <strong>bash tool</strong>, full filesystem access, and extensibility via MCP servers. This means it can read configs, write Terraform, run CLI commands, trigger pipelines, query monitoring data, and execute shell scripts — all from a single session. The guide below shows exactly how to configure and prompt Claude Code for each DevOps domain.</p>
+  </div>
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <div class="toc-grid">
+      <a class="toc-item" href="#foundation"><span class="toc-num">01</span> Foundation Setup</a>
+      <a class="toc-item" href="#cicd"><span class="toc-num">02</span> CI/CD Pipelines</a>
+      <a class="toc-item" href="#cloud"><span class="toc-num">03</span> Cloud Operations</a>
+      <a class="toc-item" href="#iac"><span class="toc-num">04</span> Infrastructure as Code</a>
+      <a class="toc-item" href="#secops"><span class="toc-num">05</span> Security & SecOps</a>
+      <a class="toc-item" href="#monitoring"><span class="toc-num">06</span> Monitoring & Alerts</a>
+      <a class="toc-item" href="#containers"><span class="toc-num">07</span> Containers & Kubernetes</a>
+      <a class="toc-item" href="#database"><span class="toc-num">08</span> Database Ops</a>
+      <a class="toc-item" href="#mcp"><span class="toc-num">09</span> MCP Server Registry</a>
+      <a class="toc-item" href="#automation"><span class="toc-num">10</span> Headless Automation</a>
+      <a class="toc-item" href="#claudemd"><span class="toc-num">11</span> CLAUDE.md Blueprint</a>
+      <a class="toc-item" href="#enterprise"><span class="toc-num">12</span> Enterprise Deployment</a>
+      <a class="toc-item" href="#scalability"><span class="toc-num">13</span> Scalability & Responsiveness</a>
+      <a class="toc-item" href="#hardened"><span class="toc-num">14</span> Hardened Images & Runtime</a>
+      <a class="toc-item" href="#observability"><span class="toc-num">15</span> Observability Stack</a>
+      <a class="toc-item" href="#compliance"><span class="toc-num">16</span> Compliance & Governance</a>
+      <a class="toc-item" href="#multicloud"><span class="toc-num">17</span> Multi-Cloud Strategy</a>
+      <a class="toc-item" href="#wellarch"><span class="toc-num">18</span> Well-Architected K8s</a>
+    </div>
+  </div>
+
+  <!-- SECTION 1: FOUNDATION -->
+  <section id="foundation">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--purple-bg); color: var(--purple);">⚙</div>
+      <h2>01 — Foundation Setup</h2>
+      <span class="tag pill-purple">Required First</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom: 1.2rem;">Before Claude Code can own your DevOps, it needs three things: the CLI installed, cloud credentials available, and a CLAUDE.md project file describing your stack.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 class="sub">Install Claude Code</h3>
+        <div class="cmd-block">
+          <div class="comment"># Requires Node.js 18+</div>
+          <div class="cmd">npm install -g @anthropic-ai/claude-code</div>
+          <div class="comment"># Navigate to your project</div>
+          <div class="cmd">cd /path/to/project</div>
+          <div class="comment"># Initialize (generates CLAUDE.md)</div>
+          <div class="cmd">claude /init</div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Expose Cloud Credentials</h3>
+        <div class="cmd-block">
+          <div class="comment"># AWS — use profiles, not inline keys</div>
+          <div class="cmd">export AWS_PROFILE=production</div>
+          <div class="cmd">export AWS_REGION=eu-west-1</div>
+          <div class="comment"># GCP</div>
+          <div class="cmd">gcloud auth application-default login</div>
+          <div class="comment"># Azure</div>
+          <div class="cmd">az login</div>
+          <div class="cmd">export ARM_SUBSCRIPTION_ID=xxxxx</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">What Claude Code can execute natively (no MCP needed)</h3>
+    <div class="cards" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
+      <div class="card" style="border-color: var(--purple-bg);">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>AWS CLI (aws ...)</div>
+        <p>Create/update resources, query status, manage IAM, S3, Lambda, ECS, EKS, RDS.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Azure CLI (az ...)</div>
+        <p>Manage resource groups, AKS, App Service, Key Vault, storage.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>gcloud CLI</div>
+        <p>GKE, Cloud Run, BigQuery, Pub/Sub, IAM policy bindings.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Terraform / OpenTofu</div>
+        <p>Plan, apply, import, state management across any provider.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>kubectl / Helm</div>
+        <p>Deploy, rollout, scale, debug pods, manage Helm chart releases.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Docker CLI</div>
+        <p>Build, tag, push images; run containers; inspect compose stacks.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:#555;"></div>GitHub CLI (gh)</div>
+        <p>Create PRs, trigger workflows, manage issues, check pipeline status.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:#c34400;"></div>Ansible</div>
+        <p>Run playbooks, manage inventory, configure servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: CI/CD -->
+  <section id="cicd">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--teal-bg); color: var(--teal);">⟳</div>
+      <h2>02 — CI/CD Pipeline Management</h2>
+      <span class="tag pill-teal">Core Capability</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom: 1.2rem;">Claude Code can write pipeline files from scratch, debug failing jobs, trigger runs, interpret logs, and iterate on configuration — all in one session.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>GitHub Actions</div>
+        <p>Writes complete workflows (.github/workflows/*.yml), adds jobs for testing, building, pushing Docker images, deploying to ECS/EKS/Lambda, and managing environments.</p>
+        <div class="cmd-block">
+          <div class="prompt">→ Prompt:</div>
+          <div class="output">"Write a GitHub Actions pipeline for our Node.js app — test on PR, build + push Docker to ECR on merge to main, deploy to ECS staging automatically, production needs approval."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Azure DevOps Pipelines</div>
+        <p>Creates azure-pipelines.yml with stages, deploys via Azure MCP server, creates PRs, traces release journeys, and manages work item linkage.</p>
+        <div class="cmd-block">
+          <div class="prompt">→ Prompt:</div>
+          <div class="output">"Set up an Azure DevOps pipeline for our .NET app with build, test, staging deploy, and production gate. Add work item ENG-421 tracking."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:#d33;"></div>GitLab CI</div>
+        <p>Writes .gitlab-ci.yml with stages, runners, environments, caching strategies, and artifact handling.</p>
+        <div class="cmd-block">
+          <div class="prompt">→ Prompt:</div>
+          <div class="output">"Debug why our GitLab pipeline's Docker build stage is failing. Here's the log: [paste log]. Fix the root cause and update .gitlab-ci.yml."</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Triggering & monitoring pipelines via GitHub CLI</h3>
+    <div class="cmd-block">
+      <div class="comment"># Claude can run all of these in its bash tool</div>
+      <div class="cmd">gh workflow run deploy.yml --field environment=staging</div>
+      <div class="cmd">gh run list --workflow=deploy.yml --limit 5</div>
+      <div class="cmd">gh run watch 123456789           <span class="comment"># stream live logs</span></div>
+      <div class="cmd">gh run view 123456789 --log-failed  <span class="comment"># show only failures</span></div>
+      <div class="cmd">gh pr checks --watch              <span class="comment"># watch checks on current PR</span></div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: CLOUD OPS -->
+  <section id="cloud">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--blue-bg); color: var(--blue);">☁</div>
+      <h2>03 — Cloud Operations</h2>
+      <span class="tag pill-blue">AWS / GCP / Azure</span>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠ Safety pattern — always have Claude plan before it acts</strong>
+      Prompt: "Show me exactly what AWS commands you'll run before executing them." For destructive ops (terminate, delete), explicitly require confirmation in your CLAUDE.md.
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>What Claude does</th><th>Example prompt</th><th>Cloud</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Provision resources</strong></td>
+            <td>Runs aws/az/gcloud commands or writes Terraform, applies it</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Create an RDS Aurora Postgres cluster in eu-west-1, multi-AZ, with a read replica"</td>
+            <td><span class="pill pill-amber">AWS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cost analysis</strong></td>
+            <td>Queries Cost Explorer API, identifies waste, suggests rightsizing</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Find our top 10 most expensive AWS resources this month and suggest cuts"</td>
+            <td><span class="pill pill-amber">AWS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Auto-scaling config</strong></td>
+            <td>Writes ASG policies, HPA manifests, scheduled scaling rules</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Set up auto-scaling for our ECS service — scale up at 70% CPU, down at 30%"</td>
+            <td><span class="pill pill-blue">Multi</span></td>
+          </tr>
+          <tr>
+            <td><strong>IAM / permissions</strong></td>
+            <td>Writes least-privilege policies, audits existing roles, detects over-permission</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Audit our IAM roles and flag any with * resource wildcards"</td>
+            <td><span class="pill pill-amber">AWS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Disaster recovery</strong></td>
+            <td>Writes runbooks, sets up cross-region replication, tests failover procedures</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Create a DR runbook for our RDS instance with point-in-time recovery steps"</td>
+            <td><span class="pill pill-blue">Multi</span></td>
+          </tr>
+          <tr>
+            <td><strong>Serverless deploy</strong></td>
+            <td>Packages Lambda functions, updates function code, manages layers</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Package and deploy the /src/functions/processor directory to Lambda, update the function config to 512MB"</td>
+            <td><span class="pill pill-amber">AWS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Network setup</strong></td>
+            <td>Creates VPCs, subnets, security groups, route tables, peering</td>
+            <td class="prompt-example" style="border:none; padding:0; font-style:italic;">"Create a VPC with public/private subnets across 3 AZs with a NAT gateway"</td>
+            <td><span class="pill pill-blue">Multi</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">AWS MCP servers (enhanced cloud access)</h3>
+    <div class="mcp-grid">
+      <div class="mcp-badge">
+        <div class="icon" style="background:#FF9900; color:#fff;">λ</div>
+        <div class="info"><div class="name">awslabs.serverless-mcp</div><div class="desc">Lambda, API GW, SAM</div></div>
+      </div>
+      <div class="mcp-badge">
+        <div class="icon" style="background:#7AA116; color:#fff;">$</div>
+        <div class="info"><div class="name">awslabs.cost-analysis-mcp</div><div class="desc">Cost Explorer, budgets</div></div>
+      </div>
+      <div class="mcp-badge">
+        <div class="icon" style="background:#3F8624; color:#fff;">⊞</div>
+        <div class="info"><div class="name">awslabs.dynamodb-mcp</div><div class="desc">DynamoDB read/query</div></div>
+      </div>
+      <div class="mcp-badge">
+        <div class="icon" style="background:#232F3E; color:#fff;">?</div>
+        <div class="info"><div class="name">awslabs.documentation-mcp</div><div class="desc">Always-fresh AWS docs</div></div>
+      </div>
+    </div>
+    <div class="cmd-block" style="margin-top:10px;">
+      <div class="comment"># Add AWS serverless MCP server to Claude Code</div>
+      <div class="cmd">claude mcp add awslabs.aws-serverless-mcp-server \</div>
+      <div class="cmd">  -e AWS_PROFILE=$AWS_PROFILE \</div>
+      <div class="cmd">  -e AWS_REGION=$AWS_REGION \</div>
+      <div class="cmd">  -- uvx awslabs.aws-serverless-mcp-server@latest --allow-write</div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: IAC -->
+  <section id="iac">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--purple-bg); color: var(--purple);">◫</div>
+      <h2>04 — Infrastructure as Code</h2>
+      <span class="tag pill-purple">Terraform · Pulumi · CDK</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom: 1.2rem;">Claude Code reads your existing .tf files, writes new modules from natural language, runs plan/apply, and interprets drift. Pair with a Pulumi or Terraform MCP server for registry-aware suggestions.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Terraform workflow</div>
+        <div class="cmd-block">
+          <div class="comment"># Claude runs these in sequence</div>
+          <div class="cmd">terraform init</div>
+          <div class="cmd">terraform validate</div>
+          <div class="cmd">terraform plan -out=tfplan</div>
+          <div class="comment"># Shows you the plan, waits for OK</div>
+          <div class="cmd">terraform apply tfplan</div>
+          <div class="cmd">terraform state list</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Common IaC prompts</div>
+        <div class="step-list" style="margin-top:0.5rem;">
+          <li><span><strong>Write</strong> a Terraform module for an EKS cluster with managed node groups, IRSA, and cluster autoscaler.</span></li>
+          <li><span><strong>Detect drift</strong> — compare terraform plan output to current state and list what changed outside Terraform.</span></li>
+          <li><span><strong>Migrate</strong> all hardcoded resource names to variables and create a variables.tf file.</span></li>
+          <li><span><strong>Import</strong> our existing S3 bucket prod-assets into the Terraform state.</span></li>
+          <li><span><strong>Create</strong> a Terragrunt structure for dev/staging/prod environments sharing common modules.</span></li>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: SECOPS -->
+  <section id="secops">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--coral-bg); color: var(--coral);">⚑</div>
+      <h2>05 — Security Operations</h2>
+      <span class="tag pill-coral">SecOps · SAST · Secrets</span>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Static analysis (SAST)</div>
+        <p>Runs Semgrep, Bandit (Python), ESLint security rules, or Snyk CLI against the codebase. Interprets findings and patches them.</p>
+        <div class="cmd-block">
+          <div class="cmd">semgrep --config=auto src/ --json</div>
+          <div class="cmd">snyk code test --json</div>
+          <div class="comment"># Then: "Fix all HIGH severity findings"</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Secret scanning</div>
+        <p>Uses gitleaks or trufflehog to detect exposed credentials in git history and working directory. Rotates secrets via CLI if found.</p>
+        <div class="cmd-block">
+          <div class="cmd">gitleaks detect --source . --report-path leak-report.json</div>
+          <div class="cmd">trufflehog git file://. --json</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Dependency scanning</div>
+        <p>Audits npm/pip/maven dependencies for CVEs, generates SBOM, upgrades vulnerable packages.</p>
+        <div class="cmd-block">
+          <div class="cmd">npm audit --json</div>
+          <div class="cmd">pip-audit --output json</div>
+          <div class="cmd">snyk test --all-projects</div>
+          <div class="comment"># Prompt: "Fix all critical CVEs and update lockfile"</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Container image scanning</div>
+        <p>Scans Docker images with Trivy or Grype for OS and library CVEs before push to registry.</p>
+        <div class="cmd-block">
+          <div class="cmd">trivy image --exit-code 1 \</div>
+          <div class="cmd">  --severity HIGH,CRITICAL \</div>
+          <div class="cmd">  myapp:latest</div>
+          <div class="cmd">grype myapp:latest -o json</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>IAM & policy auditing</div>
+        <p>Runs AWS IAM Access Analyzer, checks for overly permissive policies, unused roles, public S3 buckets, and open security groups.</p>
+        <div class="cmd-block">
+          <div class="cmd">aws accessanalyzer list-findings</div>
+          <div class="cmd">aws s3api get-bucket-acl --bucket prod-assets</div>
+          <div class="cmd">aws ec2 describe-security-groups \</div>
+          <div class="cmd">  --filters Name=ip-permission.cidr,Values='0.0.0.0/0'</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Compliance-as-code</div>
+        <p>Writes OPA/Rego policies, AWS Config rules, or Azure Policy definitions. Checks Terraform plans against compliance rules before apply.</p>
+        <div class="cmd-block">
+          <div class="comment"># Checkov scans IaC for CIS benchmarks</div>
+          <div class="cmd">checkov -d . --framework terraform</div>
+          <div class="cmd">conftest test tfplan.json \</div>
+          <div class="cmd">  --policy policy/</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Secrets Management Pattern</strong>
+      Never hardcode credentials. Claude Code can write code that fetches secrets from AWS Secrets Manager, Vault, or Azure Key Vault at runtime, and can rotate secrets by calling the relevant CLI or API.
+    </div>
+  </section>
+
+  <!-- SECTION 6: MONITORING -->
+  <section id="monitoring">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--amber-bg); color: var(--amber);">📊</div>
+      <h2>06 — Monitoring & Incident Response</h2>
+      <span class="tag pill-amber">Observability</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1rem;">With Sentry, Datadog, or Grafana MCP servers connected, Claude Code can pull live error data, correlate with code, and push fixes — all without leaving the terminal.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:#e1432d;"></div>Sentry integration</div>
+        <p>Connects via Sentry MCP. Claude reads the stack trace, finds the exact file/line in your local code, diagnoses the root cause, and applies a fix.</p>
+        <div class="prompt-example">"Check Sentry for any new CRITICAL errors in the last 2 hours. Show me the top 3 and fix the most frequent one."</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:#632ca6;"></div>Datadog / Grafana</div>
+        <p>Queries metrics and dashboards. Creates alert rules, writes runbooks, and interprets anomalies. Can also write custom Grafana dashboard JSON.</p>
+        <div class="prompt-example">"Our p99 latency spiked at 14:32 UTC. Query Datadog APM for the slowest traces during that window and identify the bottleneck."</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Log analysis</div>
+        <p>Reads CloudWatch Logs, Loki, ELK, or raw log files. Extracts error patterns, builds queries, and creates alerting rules based on patterns found.</p>
+        <div class="prompt-example">"Query CloudWatch Logs for /ecs/api-service, last 30 min. Find all 5xx errors, group by endpoint, and add an alarm for any endpoint with &gt;1% error rate."</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Incident runbooks</div>
+        <p>Generates step-by-step runbooks for common failure scenarios based on your architecture. Stores them in your repo as markdown.</p>
+        <div class="prompt-example">"Create a runbook for 'RDS connection pool exhausted'. Include diagnosis steps, mitigation, and permanent fix recommendations."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 7: CONTAINERS -->
+  <section id="containers">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--blue-bg); color: var(--blue);">⬡</div>
+      <h2>07 — Containers & Kubernetes</h2>
+      <span class="tag pill-blue">Docker · K8s · Helm</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 class="sub">Docker operations</h3>
+        <div class="cmd-block">
+          <div class="comment"># Build multi-stage optimized image</div>
+          <div class="cmd">docker build --target production \</div>
+          <div class="cmd">  --tag myapp:$(git rev-parse --short HEAD) .</div>
+          <div class="comment"># Push to ECR</div>
+          <div class="cmd">aws ecr get-login-password | \</div>
+          <div class="cmd">  docker login --username AWS \</div>
+          <div class="cmd">  --password-stdin $ECR_URL</div>
+          <div class="cmd">docker push $ECR_URL/myapp:$SHA</div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Kubernetes deployments</h3>
+        <div class="cmd-block">
+          <div class="comment"># Claude can write and apply manifests</div>
+          <div class="cmd">kubectl apply -f k8s/</div>
+          <div class="cmd">kubectl rollout status deploy/api</div>
+          <div class="cmd">kubectl rollout undo deploy/api  <span class="comment"># rollback</span></div>
+          <div class="cmd">kubectl top pods -n production</div>
+          <div class="cmd">kubectl logs -f deploy/api \</div>
+          <div class="cmd">  --since=5m --tail=100</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Key K8s tasks Claude Code handles</h3>
+    <div class="cards" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Write K8s manifests</div>
+        <p>Deployments, Services, Ingress, HPA, PodDisruptionBudgets, NetworkPolicies, RBAC.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Helm chart management</div>
+        <p>Installs, upgrades, and rolls back Helm releases. Writes custom values files per environment.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Debug CrashLoopBackOff</div>
+        <p>Reads pod events, logs, describes the pod, identifies the crash reason, and fixes the underlying issue.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Resource optimization</div>
+        <p>Reads kubectl top output, adjusts requests/limits, configures VPA or KEDA-based scaling.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 8: DATABASE -->
+  <section id="database">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--teal-bg); color: var(--teal);">⊏</div>
+      <h2>08 — Database Operations</h2>
+      <span class="tag pill-teal">Postgres · MySQL · DynamoDB</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1rem;">With a database MCP server, Claude Code reads your schema directly and writes accurate queries, migrations, and optimization recommendations without manual copy-paste.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Schema-aware development</div>
+        <p>Connects to your Postgres/MySQL via MCP, reads tables/indexes, then writes migration files, seed scripts, and optimized queries that actually match your schema.</p>
+        <div class="prompt-example">"Read the schema and write an Alembic migration to add a soft-delete 'deleted_at' column to the users table with an index."</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Query optimization</div>
+        <p>Runs EXPLAIN ANALYZE, interprets query plans, adds missing indexes, rewrites slow queries.</p>
+        <div class="prompt-example">"This query takes 4s on the orders table. Run EXPLAIN ANALYZE and rewrite it to use an index. Create the index too."</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Backup & restore</div>
+        <p>Scripts pg_dump/pg_restore workflows, sets up automated S3 backups, tests restore procedures.</p>
+        <div class="prompt-example">"Write a bash script that dumps the prod DB to S3 with PITR-style naming and verifies the backup can be restored to a test instance."</div>
+      </div>
+    </div>
+
+    <h3 class="sub">Setting up a Postgres MCP server</h3>
+    <div class="cmd-block">
+      <div class="comment"># Install and add the Postgres MCP server (read-only for safety)</div>
+      <div class="cmd">claude mcp add postgres-mcp \</div>
+      <div class="cmd">  -e POSTGRES_CONNECTION_STRING="postgresql://user:pass@host:5432/db" \</div>
+      <div class="cmd">  -- npx @modelcontextprotocol/server-postgres</div>
+      <div class="comment"># Verify connection</div>
+      <div class="cmd">claude /mcp</div>
+    </div>
+  </section>
+
+  <!-- SECTION 9: MCP REGISTRY -->
+  <section id="mcp">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--green-bg); color: var(--green);">⬝</div>
+      <h2>09 — MCP Server Registry</h2>
+      <span class="tag pill-green">Integrations</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1rem;">MCP servers extend Claude Code with live tool access. Add the ones relevant to your stack. Scoped to <code>--scope project</code>, the config lives in <code>.mcp.json</code> and is checked into version control.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Server</th><th>What it unlocks</th><th>Add command</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-teal">GitHub</span></td>
+            <td>PR reviews, issue creation, repo management, code search, Actions triggering</td>
+            <td><code>claude mcp add github --scope user</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">Azure DevOps</span></td>
+            <td>Work items, pipelines, PRs, repos, release tracing — 20 tools across domains</td>
+            <td><code>npx @azure-devops/mcp $ORG</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">AWS Serverless</span></td>
+            <td>Lambda, API Gateway, SAM — write, deploy, test serverless functions</td>
+            <td><code>uvx awslabs.aws-serverless-mcp-server</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-coral">Sentry</span></td>
+            <td>Read production errors, stack traces, affected users, release comparisons</td>
+            <td><code>claude mcp add sentry</code> (OAuth)</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-purple">Postgres</span></td>
+            <td>Live schema reading, query execution, migration planning</td>
+            <td><code>npx @modelcontextprotocol/server-postgres</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-teal">Pulumi</span></td>
+            <td>Registry lookup, IaC validation, resource graph queries</td>
+            <td><code>claude mcp add pulumi-mcp</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">Playwright</span></td>
+            <td>End-to-end browser testing, accessibility tree inspection, cross-browser runs</td>
+            <td><code>claude mcp add playwright --scope project</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Slack</span></td>
+            <td>Post deployment notifications, query channel history for incident context</td>
+            <td><code>claude mcp add slack</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">Supabase</span></td>
+            <td>Database, auth, storage, edge functions — full Supabase project access</td>
+            <td><code>claude mcp add supabase</code></td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-coral">Jira / Atlassian</span></td>
+            <td>Create/update issues, link PRs to tickets, manage sprints</td>
+            <td><code>claude mcp add atlassian</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warning-box" style="margin-top:1rem;">
+      <strong>⚠ MCP token budget</strong>
+      Each MCP server consumes context tokens. The GitHub MCP alone uses ~46,000 tokens across 91 tools. Use <strong>domain filtering</strong> (Azure DevOps supports <code>-d domains...</code>) and avoid stacking more than 5–6 servers simultaneously. If Claude seems slower or making worse decisions, reduce the active server count.
+    </div>
+  </section>
+
+  <!-- SECTION 10: AUTOMATION -->
+  <section id="automation">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--pink-bg); color: var(--pink);">▶</div>
+      <h2>10 — Headless & Pipeline Automation</h2>
+      <span class="tag pill-purple">CI Integration</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1rem;">Run Claude Code non-interactively inside CI/CD pipelines for automated code review, security scanning, documentation generation, and deployment verification.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--pink);"></div>Automated code review</div>
+        <p>Add Claude Code to a GitHub Actions workflow triggered on pull requests. It reviews code, flags issues, and posts comments.</p>
+        <div class="cmd-block">
+          <div class="comment"># In GitHub Actions yaml</div>
+          <div class="cmd">- name: Claude Code Review</div>
+          <div class="cmd">  run: |</div>
+          <div class="cmd">    claude --print \</div>
+          <div class="cmd">      "Review the diff in this PR for security issues, \</div>
+          <div class="cmd">       bugs, and breaking changes. Output as markdown."</div>
+          <div class="cmd">  env:</div>
+          <div class="cmd">    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Streaming JSON output</div>
+        <p>For programmatic CI integration, use <code>--output-format stream-json</code> to parse Claude's actions as structured events.</p>
+        <div class="cmd-block">
+          <div class="cmd">claude --output-format stream-json \</div>
+          <div class="cmd">  --print \</div>
+          <div class="cmd">  "Run tests and report failures" \</div>
+          <div class="cmd">  | jq '.result'</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div">Post-deploy verification</div>
+        <p>Runs smoke tests, checks health endpoints, verifies key flows after deployment and reports pass/fail.</p>
+        <div class="cmd-block">
+          <div class="cmd">claude --print \</div>
+          <div class="cmd">  "Hit the /health endpoint on $DEPLOY_URL. \</div>
+          <div class="cmd">   Run the smoke test suite in tests/smoke/. \</div>
+          <div class="cmd">   Output PASS or FAIL with details."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 11: CLAUDE.MD -->
+  <section id="claudemd">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--amber-bg); color: var(--amber);">📄</div>
+      <h2>11 — CLAUDE.md DevOps Blueprint</h2>
+      <span class="tag pill-amber">Project Memory</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1rem;">The <code>.claude/CLAUDE.md</code> file is loaded at the start of every session. It's your persistent memory — encode your stack, conventions, safety rules, and deployment procedures here. Commit it to git so the whole team shares context.</p>
+
+    <div class="cmd-block">
+      <div class="comment"># .claude/CLAUDE.md — example DevOps section</div>
+      <div class="highlight">## Infrastructure</div>
+      <div class="cmd">- Cloud: AWS (eu-west-1 primary, us-east-1 DR)</div>
+      <div class="cmd">- IaC: Terraform 1.8, state in S3 + DynamoDB locking</div>
+      <div class="cmd">- Containers: EKS 1.30, Helm 3, Karpenter for node autoscaling</div>
+      <div class="cmd">- CI/CD: GitHub Actions, deploys via ArgoCD (GitOps)</div>
+      <div class="cmd">- Secrets: AWS Secrets Manager (never .env files in production)</div>
+      <div class="highlight">## Deployment Rules</div>
+      <div class="cmd">- ALWAYS run terraform plan and show me output before apply</div>
+      <div class="cmd">- NEVER delete resources without explicit confirmation</div>
+      <div class="cmd">- Production deploys require a GitHub PR merged to main</div>
+      <div class="cmd">- Tag all resources with: team, environment, cost-center</div>
+      <div class="highlight">## Security Checklist (run before every deploy)</div>
+      <div class="cmd">1. trivy image scan — no CRITICAL CVEs</div>
+      <div class="cmd">2. gitleaks detect — no secrets in diff</div>
+      <div class="cmd">3. checkov -d . — no HIGH severity IaC findings</div>
+      <div class="highlight">## Environments</div>
+      <div class="cmd">- dev: auto-deploy from feature branches</div>
+      <div class="cmd">- staging: auto-deploy from main</div>
+      <div class="cmd">- production: manual approval gate in GitHub Actions</div>
+    </div>
+
+    <h3 class="sub">Custom slash commands for DevOps</h3>
+    <p style="font-size:0.82rem; color:var(--text2); margin-bottom:0.75rem;">Store in <code>.claude/commands/</code> — invoke with <code>/deploy</code>, <code>/security-scan</code>, etc.</p>
+    <div class="two-col">
+      <div class="cmd-block">
+        <div class="comment"># .claude/commands/security-scan.md</div>
+        <div class="highlight">Run our full security checklist:</div>
+        <div class="cmd">1. gitleaks detect on working directory</div>
+        <div class="cmd">2. trivy image scan on latest built image</div>
+        <div class="cmd">3. checkov on terraform/ directory</div>
+        <div class="cmd">4. npm audit on package.json</div>
+        <div class="cmd">Report findings grouped by severity.</div>
+        <div class="cmd">Auto-fix anything that can be automated.</div>
+      </div>
+      <div class="cmd-block">
+        <div class="comment"># .claude/commands/deploy-staging.md</div>
+        <div class="highlight">Deploy to staging environment:</div>
+        <div class="cmd">1. Run test suite — abort if failures</div>
+        <div class="cmd">2. Build Docker image with git SHA tag</div>
+        <div class="cmd">3. Run trivy scan — abort if CRITICAL</div>
+        <div class="cmd">4. Push image to ECR</div>
+        <div class="cmd">5. Update image tag in k8s/staging/values.yaml</div>
+        <div class="cmd">6. Commit and push to trigger ArgoCD sync</div>
+        <div class="cmd">7. Watch rollout status and report result</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTERPRISE DIVIDER -->
+  <div style="background: linear-gradient(135deg, #0d1a40 0%, #1a1040 50%, #0a2a1a 100%); border-radius: 16px; padding: 2rem 2.5rem; margin: 2rem 0 2.5rem; color:#fff; text-align:center;">
+    <div style="font-size:0.75rem; letter-spacing:1.5px; opacity:0.6; margin-bottom:0.5rem; text-transform:uppercase;">Part II</div>
+    <h2 style="font-size:1.6rem; font-weight:700; margin-bottom:0.5rem;">Enterprise-Ready Cloud Deployment</h2>
+    <p style="opacity:0.75; font-size:0.9rem; max-width:600px; margin:0 auto;">Best practices for production-grade, cloud-native deployments — scalability, hardened runtimes, observability, compliance, multi-cloud architecture, and the AWS/GCP/Azure Well-Architected frameworks.</p>
+  </div>
+
+  <!-- SECTION 12: ENTERPRISE OVERVIEW -->
+  <section id="enterprise">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--blue-bg); color: var(--blue);">🏢</div>
+      <h2>12 — Enterprise Deployment Overview</h2>
+      <span class="tag pill-blue">Production-Grade</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">Enterprise cloud deployments are not just "bigger" versions of dev setups. They are architecturally different — designed around failure domains, blast radius, regulatory boundaries, and operational runbooks that must work at 3 AM without heroics.</p>
+
+    <div class="cards" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <div class="card-title" style="font-size:0.9rem;">Scalability</div>
+        <p>Horizontal auto-scaling, stateless services, sharding, caching layers. Zero performance degradation under 10× load.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--teal);">
+        <div class="card-title" style="font-size:0.9rem;">Responsiveness</div>
+        <p>Sub-200ms p99 latency targets, CDN edge caching, async processing, circuit breakers, timeout policies.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--coral);">
+        <div class="card-title" style="font-size:0.9rem;">Security</div>
+        <p>Zero-trust networking, mTLS service mesh, secrets rotation, RBAC least-privilege, runtime threat detection.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <div class="card-title" style="font-size:0.9rem;">Compliance</div>
+        <p>SOC 2, ISO 27001, PCI-DSS, HIPAA, GDPR — automated controls, audit trails, policy-as-code enforcement.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--amber);">
+        <div class="card-title" style="font-size:0.9rem;">Observability</div>
+        <p>Unified metrics + traces + logs (OpenTelemetry), SLO-based alerting, distributed tracing, anomaly detection.</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <div class="card-title" style="font-size:0.9rem;">Reliability</div>
+        <p>Multi-AZ, active-active multi-region, chaos engineering, automated DR drills, 99.99% SLA targets.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">Enterprise deployment maturity model</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Level</th><th>Capability</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-coral">L1 — Basic</span></td><td>Manual deploy, single region, no auto-scaling, basic logging</td><td>Dev/Prototype</td></tr>
+          <tr><td><span class="pill pill-amber">L2 — Managed</span></td><td>CI/CD pipeline, managed services, auto-scaling, centralized logs</td><td>Small Production</td></tr>
+          <tr><td><span class="pill pill-blue">L3 — Resilient</span></td><td>Multi-AZ, blue/green deploys, SLO monitoring, secrets management, RBAC</td><td>Mid-Scale Production</td></tr>
+          <tr><td><span class="pill pill-teal">L4 — Enterprise</span></td><td>Multi-region active-active, GitOps, service mesh, compliance-as-code, full O11y</td><td>Enterprise Production</td></tr>
+          <tr><td><span class="pill pill-green">L5 — Cloud-Native</span></td><td>Chaos engineering, FinOps automation, multi-cloud failover, AI-driven ops</td><td>Hyperscale / Regulated</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 13: SCALABILITY & RESPONSIVENESS -->
+  <section id="scalability">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--teal-bg); color: var(--teal);">⬆</div>
+      <h2>13 — Scalability &amp; Responsiveness</h2>
+      <span class="tag pill-teal">Performance</span>
+    </div>
+
+    <h3 class="sub">Horizontal scaling patterns</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Kubernetes HPA + KEDA</div>
+        <p>HPA scales pods on CPU/memory. KEDA extends this to custom metrics: queue depth, request rate, Kafka lag, Prometheus metrics.</p>
+        <div class="cmd-block">
+          <div class="comment"># HPA on custom metric (RPS)</div>
+          <div class="cmd">apiVersion: autoscaling/v2</div>
+          <div class="cmd">kind: HorizontalPodAutoscaler</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  minReplicas: 3</div>
+          <div class="cmd">  maxReplicas: 100</div>
+          <div class="cmd">  metrics:</div>
+          <div class="cmd">  - type: Pods</div>
+          <div class="cmd">    pods:</div>
+          <div class="cmd">      metric: {name: http_requests_per_second}</div>
+          <div class="cmd">      target: {averageValue: "500"}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Stateless service design</div>
+        <p>Sessions in Redis/ElastiCache, files in S3/GCS, no local state on pods. Enables clean horizontal scale-out with zero sticky routing.</p>
+        <div class="cmd-block">
+          <div class="comment"># Claude Code prompt</div>
+          <div class="prompt">"Audit our Express app for any in-memory state or local file writes. Migrate sessions to Redis and uploads to S3. Show before/after diff."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Database read scaling</div>
+        <p>Read replicas for reporting queries, PgBouncer connection pooling, Redis caching layer for hot paths, CQRS pattern for write/read split.</p>
+        <div class="cmd-block">
+          <div class="comment"># Connection pool config</div>
+          <div class="cmd">pgbouncer:</div>
+          <div class="cmd">  pool_mode: transaction</div>
+          <div class="cmd">  max_client_conn: 1000</div>
+          <div class="cmd">  default_pool_size: 20</div>
+          <div class="cmd">  server_idle_timeout: 600</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Responsiveness: latency budget strategy</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Target latency</th><th>Technique</th><th>Claude Code action</th></tr></thead>
+        <tbody>
+          <tr><td>CDN edge</td><td>&lt; 5ms</td><td>CloudFront / Fastly / Akamai static caching</td><td>Generate cache-control headers, invalidation scripts</td></tr>
+          <tr><td>API gateway</td><td>&lt; 10ms</td><td>Response caching, request coalescing</td><td>Write Kong/AWS APIGW cache policies</td></tr>
+          <tr><td>Service mesh</td><td>&lt; 2ms overhead</td><td>Istio/Linkerd sidecar, keep-alive pools</td><td>Generate VirtualService retry + timeout configs</td></tr>
+          <tr><td>App tier</td><td>&lt; 50ms p50</td><td>Async I/O, connection pooling, warm caches</td><td>Instrument with OTel, find slow spans</td></tr>
+          <tr><td>Database</td><td>&lt; 10ms p99</td><td>Indexes, query plan analysis, connection pool</td><td>EXPLAIN ANALYZE + index recommendations</td></tr>
+          <tr><td>External calls</td><td>Circuit broken</td><td>Resilience4j / Polly / Hystrix patterns</td><td>Add circuit breaker + timeout wrapper code</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">Async &amp; event-driven patterns for high load</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Queue-based decoupling</div>
+        <p>Move non-critical paths off the request thread. SQS, Kafka, RabbitMQ for order processing, notifications, batch jobs. Prevents cascading overload.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Refactor our /api/send-email endpoint to publish to SQS instead of calling SendGrid inline. Write the SQS consumer Lambda."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Circuit breakers</div>
+        <p>Prevent failure amplification. When a downstream service degrades, fail fast locally instead of queuing 10,000 timeout threads.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Add circuit breaker pattern to our payment service client using resilience4j. Trip after 50% failure in 10s window, recover after 30s."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Graceful degradation</div>
+        <p>Feature flags disable non-critical features under load. Stale cache serving when origin is slow. Partial response instead of all-or-nothing.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Add LaunchDarkly feature flags to our recommendation engine so we can serve cached results when ML service latency &gt; 200ms."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 14: HARDENED IMAGES & RUNTIME -->
+  <section id="hardened">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--coral-bg); color: var(--coral);">🔒</div>
+      <h2>14 — Hardened Images &amp; Runtime Security</h2>
+      <span class="tag pill-coral">CIS Benchmarks</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">Every layer of the runtime stack is an attack surface. Harden from the base OS image up through the container, pod, node, and cluster levels.</p>
+
+    <h3 class="sub">Container image hardening checklist</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Distroless / scratch base</div>
+        <p>Use <code>gcr.io/distroless</code> or <code>cgr.dev/chainguard</code> images. No shell, no package manager, no OS utilities — massively reduces attack surface.</p>
+        <div class="cmd-block">
+          <div class="comment"># Multi-stage: build on full image, ship distroless</div>
+          <div class="cmd">FROM node:20-alpine AS builder</div>
+          <div class="cmd">WORKDIR /app</div>
+          <div class="cmd">COPY . . && npm ci --only=production</div>
+          <div class="cmd"> </div>
+          <div class="cmd">FROM gcr.io/distroless/nodejs20-debian12</div>
+          <div class="cmd">COPY --from=builder /app /app</div>
+          <div class="cmd">USER nonroot</div>
+          <div class="cmd">ENTRYPOINT ["node", "/app/server.js"]</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Non-root user + read-only FS</div>
+        <p>Never run as root inside a container. Set <code>runAsNonRoot: true</code>, <code>readOnlyRootFilesystem: true</code>, and drop all Linux capabilities.</p>
+        <div class="cmd-block">
+          <div class="comment"># Kubernetes securityContext</div>
+          <div class="cmd">securityContext:</div>
+          <div class="cmd">  runAsNonRoot: true</div>
+          <div class="cmd">  runAsUser: 1000</div>
+          <div class="cmd">  readOnlyRootFilesystem: true</div>
+          <div class="cmd">  allowPrivilegeEscalation: false</div>
+          <div class="cmd">  capabilities:</div>
+          <div class="cmd">    drop: ["ALL"]</div>
+          <div class="cmd">  seccompProfile:</div>
+          <div class="cmd">    type: RuntimeDefault</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Image signing &amp; provenance</div>
+        <p>Sign images with Cosign (Sigstore). Enforce signature verification at admission via Kyverno or OPA Gatekeeper. Maintain SBOM.</p>
+        <div class="cmd-block">
+          <div class="comment"># Sign after push</div>
+          <div class="cmd">cosign sign --key awskms:///alias/cosign \</div>
+          <div class="cmd">  $ECR_URL/myapp:$SHA</div>
+          <div class="comment"># Generate SBOM</div>
+          <div class="cmd">syft packages $ECR_URL/myapp:$SHA \</div>
+          <div class="cmd">  -o spdx-json &gt; sbom.json</div>
+          <div class="cmd">cosign attach sbom --sbom sbom.json \</div>
+          <div class="cmd">  $ECR_URL/myapp:$SHA</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Runtime threat detection</div>
+        <p>Falco monitors syscalls in real-time. Detects shell spawning in containers, unexpected network connections, privilege escalation attempts.</p>
+        <div class="cmd-block">
+          <div class="comment"># Falco rule example</div>
+          <div class="cmd">- rule: Shell in Container</div>
+          <div class="cmd">  desc: A shell was spawned in a container</div>
+          <div class="cmd">  condition: &gt;</div>
+          <div class="cmd">    container and proc.name in (shell_binaries)</div>
+          <div class="cmd">    and not known_shell_spawn_binaries</div>
+          <div class="cmd">  output: "Shell spawned (pod=%k8s.pod.name)"</div>
+          <div class="cmd">  priority: WARNING</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Admission control</div>
+        <p>Kyverno or OPA Gatekeeper enforce policies at deploy time: block privileged pods, require labels, mandate resource limits, block latest tag.</p>
+        <div class="cmd-block">
+          <div class="comment"># Kyverno: block :latest tag</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  rules:</div>
+          <div class="cmd">  - name: require-image-tag</div>
+          <div class="cmd">    match:</div>
+          <div class="cmd">      resources: {kinds: [Pod]}</div>
+          <div class="cmd">    validate:</div>
+          <div class="cmd">      message: "Image tag 'latest' not allowed"</div>
+          <div class="cmd">      pattern:</div>
+          <div class="cmd">        spec.containers[].image: "!*:latest"</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Network policies</div>
+        <p>Default-deny all ingress and egress. Explicitly allow only required pod-to-pod communication. Isolate namespaces by environment.</p>
+        <div class="cmd-block">
+          <div class="comment"># Default deny all</div>
+          <div class="cmd">apiVersion: networking.k8s.io/v1</div>
+          <div class="cmd">kind: NetworkPolicy</div>
+          <div class="cmd">metadata: {name: default-deny-all}</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  podSelector: {}</div>
+          <div class="cmd">  policyTypes: [Ingress, Egress]</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Instance &amp; node hardening (CIS Benchmarks)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Hardening action</th><th>Tool</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OS / AMI</strong></td><td>CIS-hardened AMI, disable unused services, kernel param tuning (sysctl), automatic security updates</td><td>AWS Inspector, CIS-CAT</td></tr>
+          <tr><td><strong>Node bootstrap</strong></td><td>Encrypt EBS volumes, disable SSH, use SSM Session Manager, rotate node IAM role credentials</td><td>AWS SSM, KMS</td></tr>
+          <tr><td><strong>Kubelet config</strong></td><td>Disable anonymous auth, enable audit logs, set pod-security standards, rotate certs automatically</td><td>kube-bench (CIS K8s)</td></tr>
+          <tr><td><strong>etcd</strong></td><td>Enable encryption at rest (KMS), restrict access to control plane only, enable TLS peer auth</td><td>AWS KMS, etcdctl</td></tr>
+          <tr><td><strong>Control plane</strong></td><td>Private API endpoint, OIDC integration, API server audit logging to S3/CloudWatch</td><td>EKS / GKE / AKS managed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box">
+      <strong>Claude Code prompt: full image hardening audit</strong>
+      "Read all our Dockerfiles in /services. For each one: check base image CVEs with trivy, flag root user, flag COPY . . patterns that leak secrets, and rewrite using distroless base + non-root user. Output a diff per service."
+    </div>
+  </section>
+
+  <!-- SECTION 15: OBSERVABILITY -->
+  <section id="observability">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--amber-bg); color: var(--amber);">◎</div>
+      <h2>15 — Enterprise Observability Stack</h2>
+      <span class="tag pill-amber">OpenTelemetry · SLOs · Tracing</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">True observability means you can answer any question about your system's behavior — without deploying new code. The three pillars (metrics, traces, logs) must be correlated by trace ID for this to work in practice.</p>
+
+    <h3 class="sub">OpenTelemetry: unified instrumentation</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>OTel SDK + Collector</div>
+        <p>Instrument once with OTel SDK. Route signals through the OTel Collector to any backend (Datadog, Grafana, Honeycomb, Jaeger) without code changes.</p>
+        <div class="cmd-block">
+          <div class="comment"># OTel Collector config</div>
+          <div class="cmd">receivers:</div>
+          <div class="cmd">  otlp: {protocols: {grpc: {}, http: {}}}</div>
+          <div class="cmd">processors:</div>
+          <div class="cmd">  batch: {timeout: 10s, send_batch_size: 1000}</div>
+          <div class="cmd">  resource: {attributes: [{action: insert,</div>
+          <div class="cmd">    key: env, value: production}]}</div>
+          <div class="cmd">exporters:</div>
+          <div class="cmd">  otlphttp/datadog: {endpoint: $DD_OTLP_ENDPOINT}</div>
+          <div class="cmd">  prometheusremotewrite: {endpoint: $GRAFANA_URL}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>SLO-based alerting</div>
+        <p>Define Service Level Objectives. Alert on error budget burn rate, not raw error count. A 5% error rate matters very differently at 3 AM vs during a load spike.</p>
+        <div class="cmd-block">
+          <div class="comment"># SLO definition (Sloth format)</div>
+          <div class="cmd">objectives:</div>
+          <div class="cmd">- name: api-availability</div>
+          <div class="cmd">  target: 0.999          # 99.9%</div>
+          <div class="cmd">  window: 30d</div>
+          <div class="cmd">  indicator:</div>
+          <div class="cmd">    events:</div>
+          <div class="cmd">      error_query: sum(rate(http_requests_total{status=~"5.."}[1m]))</div>
+          <div class="cmd">      total_query: sum(rate(http_requests_total[1m]))</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Distributed tracing</div>
+        <p>Propagate trace context (W3C TraceContext) across all services. A single trace ID links API gateway → service A → service B → database query → cache hit.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Add OpenTelemetry auto-instrumentation to our Node.js services. Configure trace context propagation between all services. Export to Tempo via OTel Collector."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Structured logging</div>
+        <p>JSON logs with consistent fields: trace_id, span_id, service, environment, user_id. Enables correlated log querying across services in one Loki/CloudWatch query.</p>
+        <div class="cmd-block">
+          <div class="cmd">{</div>
+          <div class="cmd">  "level": "error",</div>
+          <div class="cmd">  "trace_id": "4bf92f3577b34da6",</div>
+          <div class="cmd">  "service": "payment-svc",</div>
+          <div class="cmd">  "env": "production",</div>
+          <div class="cmd">  "msg": "charge failed",</div>
+          <div class="cmd">  "user_id": "u_12345",</div>
+          <div class="cmd">  "duration_ms": 2341</div>
+          <div class="cmd">}</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Grafana stack: reference architecture</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Signal</th><th>Collection</th><th>Storage</th><th>Visualization</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Metrics</strong></td><td>Prometheus scrape / OTel push</td><td>Thanos (long-term) + Cortex (HA)</td><td>Grafana dashboards</td></tr>
+          <tr><td><strong>Traces</strong></td><td>OTel SDK → Collector</td><td>Tempo (object storage backend)</td><td>Grafana Explore + TraceQL</td></tr>
+          <tr><td><strong>Logs</strong></td><td>Promtail / Fluentd → Loki</td><td>Loki (S3 chunks)</td><td>Grafana Explore + LogQL</td></tr>
+          <tr><td><strong>Profiles</strong></td><td>Pyroscope eBPF agent</td><td>Pyroscope</td><td>Grafana Flame graphs</td></tr>
+          <tr><td><strong>Events</strong></td><td>K8s events → Eventrouter</td><td>Loki / Elasticsearch</td><td>Grafana annotations</td></tr>
+          <tr><td><strong>Synthetic</strong></td><td>Grafana k6 / Blackbox exporter</td><td>Prometheus</td><td>Uptime dashboards</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box">
+      <strong>Claude Code prompt: observability gap audit</strong>
+      "Scan all services in /src. Identify which ones are missing: OTel tracing, structured JSON logging, health check endpoints (/health, /ready), and Prometheus metrics exposure (/metrics). Generate a gap report and add missing instrumentation."
+    </div>
+  </section>
+
+  <!-- SECTION 16: COMPLIANCE -->
+  <section id="compliance">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--purple-bg); color: var(--purple);">⚖</div>
+      <h2>16 — Compliance &amp; Governance</h2>
+      <span class="tag pill-purple">SOC 2 · PCI · HIPAA · GDPR</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">Compliance is not a one-time audit — it is a continuous control plane. Use policy-as-code to make compliance checks automatic, auditable, and reviewable in pull requests.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Policy-as-code (OPA)</div>
+        <p>Write Rego policies that enforce compliance requirements at Terraform plan time, Kubernetes admission, and CI/CD gate. Violations block deployment.</p>
+        <div class="cmd-block">
+          <div class="comment"># OPA/Rego: enforce encryption at rest</div>
+          <div class="cmd">deny[msg] {</div>
+          <div class="cmd">  resource := input.resource.aws_s3_bucket[name]</div>
+          <div class="cmd">  not resource.server_side_encryption_configuration</div>
+          <div class="cmd">  msg := sprintf("S3 bucket '%v' must have SSE enabled", [name])</div>
+          <div class="cmd">}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Immutable audit trails</div>
+        <p>All infrastructure changes flow through Terraform + Git. Every API call logged to CloudTrail/Audit Logs. Logs shipped to immutable S3 (Object Lock) or Worm storage.</p>
+        <div class="cmd-block">
+          <div class="comment"># Enable CloudTrail with log file validation</div>
+          <div class="cmd">aws cloudtrail create-trail \</div>
+          <div class="cmd">  --name enterprise-audit-trail \</div>
+          <div class="cmd">  --s3-bucket-name audit-logs-immutable \</div>
+          <div class="cmd">  --enable-log-file-validation \</div>
+          <div class="cmd">  --is-multi-region-trail</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Data residency &amp; GDPR</div>
+        <p>Tag resources with data classification. Enforce regional boundaries via SCP/Azure Policy. Auto-detect PII in logs using DLP scanning and mask before storage.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Scan our application logs for PII patterns (email, phone, SSN, credit card). Add log masking middleware. Generate a GDPR data flow map from our codebase."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Automated evidence collection</div>
+        <p>For SOC 2 audits, automate evidence gathering: access review exports, change management logs, vulnerability scan reports, backup test results.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Generate a SOC 2 Type II evidence package: export last 90 days of CloudTrail, access review CSV from IAM, last 5 Trivy scan reports, and backup restore test logs."</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Compliance framework mapping</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Framework</th><th>Key controls</th><th>Claude Code automation</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-blue">SOC 2 Type II</span></td><td>Access controls, change management, availability, confidentiality, logging</td><td>IAM audit exports, pipeline change logs, uptime SLO reports</td></tr>
+          <tr><td><span class="pill pill-coral">PCI-DSS v4</span></td><td>Cardholder data isolation, network segmentation, MFA, vulnerability scans</td><td>Network policy audit, quarterly ASV scan automation, token vault setup</td></tr>
+          <tr><td><span class="pill pill-purple">HIPAA</span></td><td>PHI encryption at rest+transit, access logging, BAAs, breach notification</td><td>KMS key audit, VPC flow log enablement, audit log export</td></tr>
+          <tr><td><span class="pill pill-green">ISO 27001</span></td><td>ISMS, risk register, asset inventory, incident management</td><td>Auto-generate asset inventory from cloud tags, risk scoring scripts</td></tr>
+          <tr><td><span class="pill pill-amber">GDPR</span></td><td>Data minimization, right to erasure, DPA, consent tracking, breach 72h notify</td><td>PII scanner, erasure scripts, consent log queries, DPA templates</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 17: MULTI-CLOUD -->
+  <section id="multicloud">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--green-bg); color: var(--green);">⬡</div>
+      <h2>17 — Multi-Cloud Strategy</h2>
+      <span class="tag pill-green">AWS · GCP · Azure</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">Multi-cloud is not just "run on two clouds." Done well, it means cloud-agnostic abstraction layers, portable workloads, and the operational discipline to manage increased complexity in exchange for resilience and vendor independence.</p>
+
+    <h3 class="sub">Multi-cloud deployment models</h3>
+    <div class="cards">
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <div class="card-title" style="font-size:0.9rem;">Active-Active</div>
+        <p>Traffic split across two clouds simultaneously. Global load balancer (Cloudflare / AWS Global Accelerator) routes to nearest healthy region. Zero-downtime cloud failover.</p>
+        <div class="cmd-block">
+          <div class="comment"># Cloudflare load balancer config</div>
+          <div class="cmd">origins:</div>
+          <div class="cmd">  - name: aws-us-east-1</div>
+          <div class="cmd">    address: api.aws.example.com</div>
+          <div class="cmd">    weight: 50</div>
+          <div class="cmd">  - name: gcp-us-central1</div>
+          <div class="cmd">    address: api.gcp.example.com</div>
+          <div class="cmd">    weight: 50</div>
+          <div class="cmd">  health_check: {path: /health, interval: 10s}</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--teal);">
+        <div class="card-title" style="font-size:0.9rem;">Active-Passive DR</div>
+        <p>Primary on one cloud, warm standby on another. RTO &lt; 15 minutes. Data replicated continuously. Failover triggered by health check failure or manual operator action.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Set up a DR configuration where AWS us-east-1 is primary and GCP us-central1 is warm standby. Write Terraform for both, with cross-cloud PostgreSQL replication via pglogical."</div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--purple);">
+        <div class="card-title" style="font-size:0.9rem;">Best-of-breed selection</div>
+        <p>Use each cloud for what it does best: GCP BigQuery for analytics, AWS SageMaker for ML, Azure AD for enterprise identity, Cloudflare for edge.</p>
+        <div class="cmd-block">
+          <div class="comment"># Example cross-cloud service mesh</div>
+          <div class="cmd">AWS EKS  →  core application</div>
+          <div class="cmd">GCP BigQuery  →  analytics pipeline</div>
+          <div class="cmd">Azure AD  →  enterprise SSO / OIDC</div>
+          <div class="cmd">Cloudflare  →  CDN + WAF + Zero Trust</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub">Cloud-agnostic abstraction patterns</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Capability</th><th>Cloud-specific</th><th>Abstraction layer</th><th>Claude Code role</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Object storage</strong></td><td>S3 / GCS / Azure Blob</td><td>MinIO SDK / Rclone / libcloud</td><td>Write storage client using provider-agnostic SDK</td></tr>
+          <tr><td><strong>Managed K8s</strong></td><td>EKS / GKE / AKS</td><td>Crossplane / Cluster API</td><td>Generate Crossplane provider configs per cloud</td></tr>
+          <tr><td><strong>Secrets</strong></td><td>Secrets Manager / Secret Mgr / Key Vault</td><td>HashiCorp Vault (cloud-agnostic)</td><td>Write Vault config + cloud auth backends</td></tr>
+          <tr><td><strong>Message queue</strong></td><td>SQS / Pub/Sub / Service Bus</td><td>DAPR pub/sub / CloudEvents</td><td>Generate DAPR component manifests per cloud</td></tr>
+          <tr><td><strong>Service mesh</strong></td><td>App Mesh / Traffic Director / ASB</td><td>Istio / Linkerd (both multi-cloud)</td><td>Write Istio VirtualService + DestinationRule configs</td></tr>
+          <tr><td><strong>IaC</strong></td><td>CloudFormation / Deployment Mgr / ARM</td><td>Terraform / Pulumi / CDK tf</td><td>Write multi-provider Terraform with shared modules</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">Multi-cloud data synchronization</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Database replication</div>
+        <p>Cross-cloud Postgres streaming replication (pglogical), CockroachDB multi-region, or PlanetScale for MySQL. Target &lt; 5s replication lag for DR.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>Event streaming</div>
+        <p>Kafka with MirrorMaker 2 or Confluent Replicator for cross-cloud event sync. Enables real-time data parity between active-active deployments.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Object storage sync</div>
+        <p>Rclone scheduled sync or AWS DataSync for S3→GCS→Azure Blob. Critical for backup redundancy and regulatory data residency requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 18: WELL-ARCHITECTED K8s -->
+  <section id="wellarch">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--blue-bg); color: var(--blue);">🏛</div>
+      <h2>18 — Well-Architected Cloud-Native K8s Deployment</h2>
+      <span class="tag pill-blue">5 Pillars</span>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text2); margin-bottom:1.2rem;">The AWS, GCP, and Azure Well-Architected Frameworks share five core pillars. Applied to Kubernetes deployments, each pillar translates to concrete configurations and Claude Code prompts.</p>
+
+    <!-- PILLAR 1 -->
+    <h3 class="sub" style="color:var(--blue);">Pillar 1 — Operational Excellence</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--blue);"></div>GitOps with ArgoCD / Flux</div>
+        <p>The cluster state is always derived from Git. No manual kubectl applies in production. Drift is detected and auto-corrected. Full audit trail of every change.</p>
+        <div class="cmd-block">
+          <div class="comment"># ArgoCD Application manifest</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  source:</div>
+          <div class="cmd">    repoURL: https://github.com/org/k8s-config</div>
+          <div class="cmd">    targetRevision: main</div>
+          <div class="cmd">    path: apps/production</div>
+          <div class="cmd">  syncPolicy:</div>
+          <div class="cmd">    automated: {prune: true, selfHeal: true}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Progressive delivery</div>
+        <p>Blue/green, canary, and feature-flag-gated releases using Argo Rollouts or Flagger. Automated rollback triggered when error rate SLO is breached.</p>
+        <div class="cmd-block">
+          <div class="comment"># Argo Rollouts canary</div>
+          <div class="cmd">strategy:</div>
+          <div class="cmd">  canary:</div>
+          <div class="cmd">    steps:</div>
+          <div class="cmd">    - setWeight: 5</div>
+          <div class="cmd">    - pause: {duration: 10m}</div>
+          <div class="cmd">    - setWeight: 20</div>
+          <div class="cmd">    - analysis: {templates: [{name: success-rate}]}</div>
+          <div class="cmd">    - setWeight: 100</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILLAR 2 -->
+    <h3 class="sub" style="color:var(--coral); margin-top: 1.5rem;">Pillar 2 — Security</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--coral);"></div>Zero-trust service mesh</div>
+        <p>Istio with STRICT mTLS mode. Every service-to-service call is mutually authenticated and encrypted. AuthorizationPolicies define explicit allow-lists.</p>
+        <div class="cmd-block">
+          <div class="cmd">apiVersion: security.istio.io/v1beta1</div>
+          <div class="cmd">kind: PeerAuthentication</div>
+          <div class="cmd">metadata: {name: default, namespace: production}</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  mtls: {mode: STRICT}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Workload identity (IRSA/WI)</div>
+        <p>Pods never hold long-lived cloud credentials. AWS IRSA / GKE Workload Identity / AKS Pod Identity bind K8s service accounts to cloud IAM roles.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Configure IRSA for our payment-service pod to access DynamoDB and SecretsManager using least-privilege IAM policy. No access keys."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILLAR 3 -->
+    <h3 class="sub" style="color:var(--teal); margin-top: 1.5rem;">Pillar 3 — Reliability</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--teal);"></div>Pod disruption budgets</div>
+        <p>Guarantee minimum available replicas during node drain, cluster upgrades, or rolling updates. Prevent accidental full-service outage during maintenance.</p>
+        <div class="cmd-block">
+          <div class="cmd">apiVersion: policy/v1</div>
+          <div class="cmd">kind: PodDisruptionBudget</div>
+          <div class="cmd">spec:</div>
+          <div class="cmd">  minAvailable: 2      # or 80%</div>
+          <div class="cmd">  selector:</div>
+          <div class="cmd">    matchLabels: {app: api-service}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Multi-AZ pod spreading</div>
+        <p>Topology spread constraints ensure pods are distributed across AZs. Node affinity rules prevent co-location of all replicas on the same node.</p>
+        <div class="cmd-block">
+          <div class="cmd">topologySpreadConstraints:</div>
+          <div class="cmd">- maxSkew: 1</div>
+          <div class="cmd">  topologyKey: topology.kubernetes.io/zone</div>
+          <div class="cmd">  whenUnsatisfiable: DoNotSchedule</div>
+          <div class="cmd">  labelSelector:</div>
+          <div class="cmd">    matchLabels: {app: api}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--purple);"></div>Chaos engineering</div>
+        <p>LitmusChaos or Chaos Monkey validates resilience. Kill random pods, inject network latency, drain nodes — verify your SLOs hold before an incident does it for you.</p>
+        <div class="cmd-block">
+          <div class="prompt">"Write a LitmusChaos experiment that kills 30% of api-service pods every 5 minutes for 1 hour. Alert me if error rate breaches 0.1%."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILLAR 4 -->
+    <h3 class="sub" style="color:var(--green); margin-top: 1.5rem;">Pillar 4 — Performance Efficiency</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--green);"></div>Right-sized resource requests</div>
+        <p>VPA (Vertical Pod Autoscaler) in recommendation mode suggests CPU/memory based on real usage. Avoid overprovisioning (wasted cost) and underprovisioning (OOMKills).</p>
+        <div class="cmd-block">
+          <div class="comment"># Get VPA recommendations</div>
+          <div class="cmd">kubectl get vpa api-service -o yaml</div>
+          <div class="comment"># Claude reads + applies recommendations</div>
+          <div class="prompt">"Apply VPA recommendations for all deployments in the production namespace. Update resource requests/limits in values.yaml."</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="dot" style="background:var(--amber);"></div>Karpenter node provisioning</div>
+        <p>Karpenter provisions the right instance type for each workload's actual resource needs — not a fixed node pool. Spot instances for stateless workloads.</p>
+        <div class="cmd-block">
+          <div class="cmd">spec:</div>
+          <div class="cmd">  disruption:</div>
+          <div class="cmd">    consolidationPolicy: WhenUnderutilized</div>
+          <div class="cmd">  requirements:</div>
+          <div class="cmd">  - key: karpenter.sh/capacity-type</div>
+          <div class="cmd">    operator: In</div>
+          <div class="cmd">    values: [spot, on-demand]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILLAR 5 -->
+    <h3 class="sub" style="color:var(--amber); margin-top: 1.5rem;">Pillar 5 — Cost Optimization (FinOps)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Optimization</th><th>Savings potential</th><th>Claude Code action</th></tr></thead>
+        <tbody>
+          <tr><td>Spot instances for non-critical workloads</td><td>60–80%</td><td>Configure Karpenter spot NodePool + interruption handling</td></tr>
+          <tr><td>Right-size over-provisioned nodes</td><td>20–40%</td><td>Analyze kubectl top + VPA recommendations → update manifests</td></tr>
+          <tr><td>Delete idle resources (dev envs)</td><td>15–30%</td><td>Script to identify and delete namespaces with no traffic for 7 days</td></tr>
+          <tr><td>Optimize data transfer costs</td><td>10–25%</td><td>Move cross-AZ traffic to same-AZ, use VPC endpoints for S3/ECR</td></tr>
+          <tr><td>Reserved capacity for base load</td><td>30–50%</td><td>Analyze usage patterns → recommend Savings Plans / CUDs</td></tr>
+          <tr><td>Image layer deduplication</td><td>30–60% storage</td><td>Rewrite Dockerfiles to share common base layers across services</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem;">
+      <strong>Claude Code: full Well-Architected review prompt</strong>
+      "Run a Well-Architected review on our Kubernetes manifests in /k8s/. Check each pillar: (1) GitOps/progressive delivery setup, (2) mTLS + RBAC + pod security, (3) PDBs + topology spread + resource limits, (4) HPA + VPA + Karpenter config, (5) namespace cost tags + spot usage. Generate a scored report and a prioritized remediation plan."
+    </div>
+  </section>
+
+  <!-- FINAL TABLE -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--bg2); color: var(--text2);">✓</div>
+      <h2>Complete Capability Overview</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Domain</th><th>What Claude Code does</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td>App code generation</td><td>Full-stack code, tests, APIs</td><td>Native</td></tr>
+          <tr><td>CI/CD pipelines</td><td>Write, debug, trigger, monitor</td><td>Bash + GitHub CLI</td></tr>
+          <tr><td>Cloud provisioning</td><td>AWS / GCP / Azure resource CRUD</td><td>Bash (cloud CLIs)</td></tr>
+          <tr><td>Infrastructure as Code</td><td>Terraform, Pulumi, CDK — write &amp; apply</td><td>Bash + Pulumi MCP</td></tr>
+          <tr><td>Container build &amp; push</td><td>Docker multi-stage, ECR/GCR/ACR push</td><td>Bash (Docker CLI)</td></tr>
+          <tr><td>Kubernetes operations</td><td>Deploy, debug, scale, rollback</td><td>Bash (kubectl/Helm)</td></tr>
+          <tr><td>Database migrations</td><td>Schema-aware migrations, query tuning</td><td>Bash + Postgres MCP</td></tr>
+          <tr><td>Security scanning</td><td>SAST, secrets, CVEs, IaC compliance</td><td>Bash (Semgrep, Trivy, etc.)</td></tr>
+          <tr><td>Monitoring &amp; alerting</td><td>Read errors, correlate, fix, add alerts</td><td>Sentry / Datadog MCP</td></tr>
+          <tr><td>Cost optimization</td><td>Query spend, rightsize, flag waste</td><td>AWS Cost MCP + Bash</td></tr>
+          <tr><td>Incident response</td><td>Log analysis, runbooks, rollbacks</td><td>Bash + MCP</td></tr>
+          <tr><td>Documentation</td><td>Runbooks, ADRs, CHANGELOG, API docs</td><td>Native</td></tr>
+          <tr><td>Headless CI automation</td><td>Automated review, scan, verify in CI</td><td><code>claude --print</code></td></tr>
+          <tr><td>Scalability design</td><td>HPA/KEDA, stateless audit, connection pools, circuit breakers</td><td>Bash + manifests</td></tr>
+          <tr><td>Image hardening</td><td>Distroless images, non-root, Cosign signing, SBOM, Falco rules</td><td>Bash (Trivy, Cosign, Syft)</td></tr>
+          <tr><td>Observability stack</td><td>OTel instrumentation, SLO definitions, structured log audit</td><td>Native + OTel SDK</td></tr>
+          <tr><td>Compliance-as-code</td><td>OPA/Rego policies, audit trail export, PII scanning, evidence packages</td><td>Bash (Checkov, Conftest)</td></tr>
+          <tr><td>Multi-cloud architecture</td><td>Terraform multi-provider, Vault, DAPR, cross-cloud data sync</td><td>Bash + Terraform</td></tr>
+          <tr><td>Well-Architected review</td><td>GitOps, mTLS, PDBs, topology spread, FinOps, Karpenter tuning</td><td>Bash + kubectl + Kyverno</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Claude Code DevOps Guide · Part I: DevOps Operations · Part II: Enterprise Cloud Deployment Best Practices · March 2026
+</footer>
+
+</body>
+</html>
